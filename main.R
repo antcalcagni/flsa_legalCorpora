@@ -131,7 +131,7 @@ title("(A)", line = 1.5,adj=0);
 plot(nocs,Z2[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UMass-like",xlab="",ylab="",col=cls[2]); 
 polygon(c(nocs, rev(nocs)), c(Z2[2,], rev(Z2[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z2[3,],lwd=lwdx,col=cls[2])
 px1=kneePoint(x = nocs,y = Z2[3,],plot = FALSE,df = 1,bty="n",sign = -1,xQuery = nocs)
-abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(1+px1),cex = 1.25,col=cls[2])
+abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(px1),cex = 1.25,col=cls[2])
 title("(B)", line = 1.5,adj=0); 
 
 m=2; lwdx=2
@@ -141,13 +141,13 @@ Z1 = apply(OUT_flsa[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75)),mean(x)))
 plot(nocs,Z1[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UCI-like",xlab="",ylab="",col=cls[1]); 
 polygon(c(nocs, rev(nocs)), c(Z1[2,], rev(Z1[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z1[3,],lwd=lwdx,col=cls[1])
 px1=kneePoint(x = nocs,y = Z1[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
-abline(v = c(px1),col=cls[1],lty=2,lwd=1.25); text(c(px1+2),c(Z1[3,1]),labels = c(px1-2),cex = 1.25,col=cls[1])
+abline(v = c(px1),col=cls[1],lty=2,lwd=1.25); text(c(px1+2),c(Z1[3,1]),labels = c(px1),cex = 1.25,col=cls[1])
 title("(C)", line = 1.5,adj=0); 
 #D
 plot(nocs,Z2[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UCI-like",xlab="",ylab="",col=cls[2]); 
 polygon(c(nocs, rev(nocs)), c(Z2[2,], rev(Z2[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z2[3,],lwd=lwdx,col=cls[2])
 px1=kneePoint(x = nocs,y = Z2[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
-abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(2+px1),cex = 1.25,col=cls[2])
+abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(px1),cex = 1.25,col=cls[2])
 title("(D)", line = 1.5,adj=0); 
 
 add_legend("bottom",fill = cls,legend = c("flsa","lda"),border = FALSE,bty = "n",ncol = 2,cex=1.5)
