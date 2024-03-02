@@ -74,17 +74,12 @@ save(X,dtm_matrix_filtered,dtm_filtered,fcm_matrix_filtered,words,file = "data/c
 
 load("results/casestudy_cv_results_flsa.RData")
 nocs = 2:45
-K=dim(out)[2]
-ntopics = dim(out)[3]+1
-cvres_flsa = round(apply(out,c(1,3),mean),5)
-colnames(cvres_flsa)=nocs; rownames(cvres_flsa)=c("mean_logratio","mean_pmi","mean_npmi","mean_difference","mean_npmi_cosim","mean_npmi_cosim2","probcoh","hellingD","Fsilh","arun2010","perplex","mimno2011")
+K=dim(OUT_flsa)[2]
+ntopics = dim(OUT_flsa)[3]+1
+cvres_flsa = OUT_flsa
 
 load("results/casestudy_cv_results_lda.RData")
-K=dim(out)[2]
-ntopics = dim(out)[3]+1
-cvres_lda = round(apply(out,c(1,3),mean),5)
-colnames(cvres_lda)=nocs; rownames(cvres_lda)=c("mean_logratio","mean_pmi","mean_npmi","mean_difference","mean_npmi_cosim","mean_npmi_cosim2","probcoh","hellingD","Fsilh","arun2010","perplex","mimno2011")
-
+cvres_lda = OUT_lda
 
 
 # Running models on selected n topics -------------------------------------
@@ -120,22 +115,41 @@ cls = c("#36648B", #steelblue4
 
 
 ## Figure 1
-tikzDevice::tikz(file='fig1.tex',width=5,height=3)
-par(mfrow=c(1,2)); nocs=2:45
-#Panel A
-m=1; cvres_lda[m,1]=cvres_lda[m,2]; lwdx=2
-Z=cbind(cvres_flsa[m,],cvres_lda[m,]); Z = Z[complete.cases(Z),]
-plot(Z[,1],bty="n",type="l",lwd=lwdx,ylim = c(min(Z),max(Z)),main="UMass-like",xlab="",ylab="",col=cls[1]); points(Z[,2],type="l",lwd=lwdx,col=cls[2]) 
-px1=kneePoint(x = nocs,y = cvres_flsa[m,],plot = FALSE,df = 1,bty="n",sign = -1,xQuery = 1:length(nocs)); px2=kneePoint(x = nocs,y = cvres_lda[m,],plot = FALSE,df = 1,bty="n",sign = -1,xQuery = 1:length(nocs))
-abline(v = c(px1,px2),col=cls,lty=2,lwd=1.25); text(c(px1,px2),c(cvres_flsa[m,1],cvres_lda[m,1]),labels = c(nocs[px1],nocs[px2]),cex = 1.25,col=cls)
+tikzDevice::tikz(file='../contribution/fig1.tex',width=7.5,height=2)
+par(mfrow=c(1,4))
+#Panels A-B
+m=1; lwdx=2
+Z2 = apply(OUT_lda[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75),na.rm=TRUE),mean(x,na.rm=TRUE)))
+Z1 = apply(OUT_flsa[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75)),mean(x)))
+#A
+plot(nocs,Z1[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UMass-like",xlab="",ylab="",col=cls[1]); 
+polygon(c(nocs, rev(nocs)), c(Z1[2,], rev(Z1[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z1[3,],lwd=lwdx,col=cls[1])
+px1=kneePoint(x = nocs,y = Z1[3,],plot = FALSE,df = 1,bty="n",sign = -1,xQuery = nocs)
+abline(v = c(px1),col=cls[1],lty=2,lwd=1.25); text(c(px1)+2,c(Z1[3,1]),labels = c(px1),cex = 1.25,col=cls[1])
 title("(A)", line = 1.5,adj=0); 
-#Panel B
-m=2; cvres_lda[m,1]=cvres_lda[m,2]; lwdx=2
-Z=cbind(cvres_flsa[m,],cvres_lda[m,])
-plot(Z[,1],bty="n",type="l",lwd=lwdx,ylim = c(min(Z),max(Z)),xlab="",ylab="",main="UCI-like",col=cls[1]); points(Z[,2],type="l",lwd=lwdx,col=cls[2])
-px1=kneePoint(x = nocs,y = cvres_flsa[m,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = 1:length(nocs)); px2=kneePoint(x = nocs,y = cvres_lda[m,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = 1:length(nocs))
-abline(v = c(px1,px2),col=cls,lty=2,lwd=1.25); text(c(px1,px2),c(cvres_flsa[m,1],cvres_lda[m,1]),labels = c(nocs[px1],nocs[px2]),cex=1.25,col=cls)
-title("(B)", line = 1,adj=0)
+#B
+plot(nocs,Z2[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UMass-like",xlab="",ylab="",col=cls[2]); 
+polygon(c(nocs, rev(nocs)), c(Z2[2,], rev(Z2[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z2[3,],lwd=lwdx,col=cls[2])
+px1=kneePoint(x = nocs,y = Z2[3,],plot = FALSE,df = 1,bty="n",sign = -1,xQuery = nocs)
+abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(1+px1),cex = 1.25,col=cls[2])
+title("(B)", line = 1.5,adj=0); 
+
+m=2; lwdx=2
+Z2 = apply(OUT_lda[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75),na.rm=TRUE),mean(x,na.rm=TRUE)))
+Z1 = apply(OUT_flsa[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75)),mean(x)))
+#C
+plot(nocs,Z1[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UCI-like",xlab="",ylab="",col=cls[1]); 
+polygon(c(nocs, rev(nocs)), c(Z1[2,], rev(Z1[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z1[3,],lwd=lwdx,col=cls[1])
+px1=kneePoint(x = nocs,y = Z1[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
+abline(v = c(px1),col=cls[1],lty=2,lwd=1.25); text(c(px1+2),c(Z1[3,1]),labels = c(px1-2),cex = 1.25,col=cls[1])
+title("(C)", line = 1.5,adj=0); 
+#D
+plot(nocs,Z2[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main="UCI-like",xlab="",ylab="",col=cls[2]); 
+polygon(c(nocs, rev(nocs)), c(Z2[2,], rev(Z2[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z2[3,],lwd=lwdx,col=cls[2])
+px1=kneePoint(x = nocs,y = Z2[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
+abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(2+px1),cex = 1.25,col=cls[2])
+title("(D)", line = 1.5,adj=0); 
+
 add_legend("bottom",fill = cls,legend = c("flsa","lda"),border = FALSE,bty = "n",ncol = 2,cex=1.5)
 dev.off()
 
@@ -204,6 +218,50 @@ j=1;barplot(t(round(Pwts_n[Iid[1:10,j],],3)),border = FALSE,beside = FALSE,horiz
 j=2;barplot(t(round(Pwts_n[Iid[1:10,j],],3)),border = FALSE,beside = FALSE,horiz = TRUE,las=2,col = c("#EEB422","#00B2EE","#B4EEB4"),cex.names = 1.35); title(paste0("Topic ",j), line = 1,adj=0,cex=1.35)
 j=3;barplot(t(round(Pwts_n[Iid[1:10,j],],3)),border = FALSE,beside = FALSE,horiz = TRUE,las=2,col = c("#EEB422","#00B2EE","#B4EEB4"),cex.names = 1.35); title(paste0("Topic ",j), line = 1,adj=0,cex=1.35)
 add_legend("bottom",legend = c("Topic 1","Topic 2","Topic 3"),fill = c("#EEB422","#00B2EE","#B4EEB4"),border = FALSE,bty = "n",cex=1.5,ncol=3)
+dev.off()
+
+
+
+# Supplementary Materials -------------------------------------------------
+
+## Figure 1-sup
+tikzDevice::tikz(file='fig1_supp.tex',width=6.5,height=4)
+par(mfcol=c(2,3))
+lwdx=2; mains = c("Mean-diff","Hellinger dist", "Arun 2010")
+for(m in 3:5){
+  
+  Z2 = apply(OUT_lda[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75),na.rm=TRUE),mean(x,na.rm=TRUE)))
+  Z1 = apply(OUT_flsa[m,,,],c(2),function(x)c(quantile(x,c(0.25,0.75)),mean(x)))
+  #A
+  plot(nocs,Z1[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main=mains[m-2],xlab="",ylab="",col=cls[1]); 
+  polygon(c(nocs, rev(nocs)), c(Z1[2,], rev(Z1[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z1[3,],lwd=lwdx,col=cls[1])
+  if(m<5){px1=kneePoint(x = nocs,y = Z1[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
+  abline(v = c(px1),col=cls[1],lty=2,lwd=1.25); text(c(px1)+2,c(Z1[3,1]),labels = c(px1),cex = 1.25,col=cls[1])}
+  title(paste0("(",LETTERS[m-2],")"), line = 1.5,adj=0); 
+  #B
+  plot(nocs,Z2[3,],bty="n",type="l",lwd=lwdx,ylim = c(min(Z1,Z2),max(Z1,Z2)),main=mains[m-2],xlab="",ylab="",col=cls[2]); 
+  polygon(c(nocs, rev(nocs)), c(Z2[2,], rev(Z2[1,])),col = "#EEE9E9",border = FALSE); lines(nocs,Z2[3,],lwd=lwdx,col=cls[2])
+  if(m<5){px1=kneePoint(x = nocs,y = Z2[3,],plot = FALSE,df = 1,bty="n",sign = 1,xQuery = nocs)
+  abline(v = c(px1),col=cls[2],lty=2,lwd=1.25); text(c(px1+2),c(Z2[3,1]),labels = c(1+px1),cex = 1.25,col=cls[2])}
+  title(paste0("(",LETTERS[m-2],")"), line = 1.5,adj=0); 
+}
+add_legend("bottom",fill = cls,legend = c("flsa","lda"),border = FALSE,bty = "n",ncol = 2,cex=1.5)
+dev.off()
+
+
+## Figure 2-sup
+tikzDevice::tikz(file='fig2_supp.tex',width=4.5,height=6)
+par(mfrow=c(3,2))
+
+mains = c("UMass-like","UCI-like","Mean-diff","Hellinger dist", "Arun 2010")
+for(m in 1:5){
+  Z1 = t(apply(OUT_flsa[m,,,],c(1,3),mean,na.rm=TRUE))
+  Z2 = t(apply(OUT_lda[m,,,],c(1,3),mean,na.rm=TRUE))
+  boxplot(Z1,at=seq(1,20,by=2)-1,frame=FALSE,col=cls[1],ylim=c(min(Z1,Z2),max(Z1,Z2)),xlim=c(0,22),names=rep("",10),xlab="",main=mains[m])
+  boxplot(Z2,at=seq(1,20,by=2),frame=FALSE,add=TRUE,col=cls[2]); 
+  title(paste0("(",LETTERS[m],")"), line = 1.5,adj=0); 
+}
+add_legend("bottom",fill = cls,legend = c("flsa","lda"),border = FALSE,bty = "n",ncol = 2,cex=1.5)
 dev.off()
 
 
